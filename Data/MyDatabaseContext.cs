@@ -11,6 +11,7 @@ namespace DotNetCoreSqlDb.Models
         public MyDatabaseContext (DbContextOptions<MyDatabaseContext> options)
             : base(options)
         {
+            Database.EnsureCreated();
         }
 
         public DbSet<DotNetCoreSqlDb.Models.Todo> Todo { get; set; }
