@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using DotNetCoreSqlDb.Models;
 
@@ -12,6 +8,18 @@ namespace DotNetCoreSqlDb.Controllers
     {
         public IActionResult Index()
         {
+            return View();
+        }
+
+        public IActionResult ExternalCall()
+        {
+            var httpClient = new System.Net.Http.HttpClient();
+            var response = httpClient.GetAsync("https://dog-api.kinduff.com/api/facts?number=5").Result;
+
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            ViewBag.JsonData = result;
+
             return View();
         }
 
