@@ -59,7 +59,7 @@ jobs:
         with:
           azcliversion: 2.33.1
           inlineScript: |
-            FULL_PACKAGE_NAME=${{ env.PACKAGE_NAME }}-${{ env.GITHUB_SHA }}
+            FULL_PACKAGE_NAME=${{ env.PACKAGE_NAME }}-${{ github.sha }}
             echo "Package name: $FULL_PACKAGE_NAME"
             az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name $FULL_PACKAGE_NAME.zip --file myapp.zip
       - name: Get date after 30 minutes
@@ -72,7 +72,7 @@ jobs:
         with:
           azcliversion: 2.33.1
           inlineScript: |
-            FULL_PACKAGE_NAME=${{ env.PACKAGE_NAME }}-${{ env.GITHUB_SHA }}
+            FULL_PACKAGE_NAME=${{ env.PACKAGE_NAME }}-${{ github.sha }}
             STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }} --query "[0].value" --output tsv)            
             SAS=$(az storage account generate-sas --permissions rl --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --account-key $STORAGE_ACCOUNT_KEY --services b --resource-types co --expiry ${{ steps.date.outputs.date }} -o tsv)
             ZIP_URL="https://${{ secrets.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/packages/$FULL_PACKAGE_NAME.zip?$SAS"
