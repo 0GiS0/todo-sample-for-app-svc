@@ -58,7 +58,8 @@ jobs:
           inlineScript: |            
             az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name dotnetapp.zip --file myapp.zip
             STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }} --query "[0].value" --output tsv)
-            end=$(date --date="30 minutes" '+%Y-%m-%dT%H:%MZ')
+            date --date="30 minutes" +%Y-%m-%dT%H:%MZ
+            end=$(date --date="30 minutes" +%Y-%m-%dT%H:%MZ)
             SAS=$(az storage account generate-sas --permissions rl --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --account-key $STORAGE_ACCOUNT_KEY --services b --resource-types co --expiry $end -o tsv)
             ZIP_URL="https://${{ secrets.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/packages/dotnetapp.zip?$SAS"
             SUBSCRIPTION_ID=$(az account show --query id --output tsv)
