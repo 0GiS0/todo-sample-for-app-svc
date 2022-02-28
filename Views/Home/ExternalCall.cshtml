@@ -1,5 +1,8 @@
-﻿@{
+﻿@using System.Text.Json
+@{
     ViewData["Title"] = "Home Page";
 }
 
-@Html.Raw(ViewBag.JsonData)
+<pre>
+    @Html.Raw(JsonSerializer.Serialize(JsonDocument.Parse(ViewBag.JsonData), new JsonSerializerOptions { WriteIndented = true }))
+</pre>

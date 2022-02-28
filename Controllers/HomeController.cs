@@ -16,7 +16,7 @@ namespace DotNetCoreSqlDb.Controllers
             var httpClient = new System.Net.Http.HttpClient();
             var response = httpClient.GetAsync("https://dog-api.kinduff.com/api/facts?number=5").Result;
 
-            var result = response.Content.ReadAsStringAsync().Result;
+            var result = response.Content.ReadAsStringAsync().Result;           
 
             ViewBag.JsonData = result;
 
