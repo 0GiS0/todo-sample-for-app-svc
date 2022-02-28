@@ -60,9 +60,10 @@ jobs:
       - name: Get date after 30 minutes
         id: date
         run: |          
-          TZ=Europe/Madrid date -d "30 minutes" +%Y-%m-%dT%H:%MZ
-          echo "::set-output name=date::$(TZ=Europe/Madrid date -d "30 minutes" +%Y-%m-%dT%H:%MZ)"
+          date -d "30 minutes" +%Y-%m-%dT%H:%MZ
+          echo "::set-output name=date::$(date -d "30 minutes" +%Y-%m-%dT%H:%MZ)"
       - name: Azure CLI script
+        id: deployment
         uses: azure/CLI@v1
         with:
           azcliversion: 2.33.1
@@ -83,4 +84,10 @@ jobs:
                 "restart": false
               }
             }'
-            az rest --method GET --uri $SITE_URI
+            echo "::set-output name=deployment::$SITE_URI"
+      - name: Check if the deployment success
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.33.1
+          inlineScript: |
+            az rest --method GET --uri ${{ steps.deployment.outputs.deployment }}
