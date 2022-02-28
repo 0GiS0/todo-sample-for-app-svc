@@ -90,4 +90,17 @@ jobs:
         with:
           azcliversion: 2.33.1
           inlineScript: |
-            az rest --method GET --uri ${{ steps.deployment.outputs.deployment }}
+            #az rest --method GET --uri ${{ steps.deployment.outputs.deployment }}
+
+            echo "Install jq"
+            sudo apt-get install jq
+
+            while true; do
+              STATUS=$(az rest --method GET --uri ${{ steps.deployment.outputs.deployment }} | jq '.value[0].properties.provisioningState')
+              if [ "$STATUS" == "Succeeded" ]; then
+                echo "Deployment succeeded"
+                break
+              fi
+              echo "Deployment in $STATUS..."
+              sleep 5
+            done
