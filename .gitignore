@@ -351,3 +351,6 @@ MigrationBackup/
 appsettings.Development.json
 .vscode/settings.json
 .vscode/tasks.json
+
+dotnetapp/
+dotnetapp.zip

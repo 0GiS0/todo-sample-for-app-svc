@@ -1,0 +1,74 @@
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP.Net Core app to Azure Web App - todo-web-demo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+          include-prerelease: true
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v2
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build   
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v2
+        with:
+          name: .net-app
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Zip up the app
+        run: zip -r myapp.zip ${{ env.DOTNET_ROOT }}/myapp
+      - name: Azure CLI script
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.33.1
+          inlineScript: |            
+            az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name dotnetapp.zip --file myapp.zip
+            STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }} --query "[0].value" --output tsv)
+            end=`date -v+30M '+%Y-%m-%dT%H:%MZ'`
+            SAS=$(az storage account generate-sas --permissions rl --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --account-key $STORAGE_ACCOUNT_KEY --services b --resource-types co --expiry $end -o tsv)
+            ZIP_URL="https://${{ secrets.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/packages/dotnetapp.zip?$SAS"
+            SUBSCRIPTION_ID=$(az account show --query id --output tsv)
+            SITE_URI="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ secrets.RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ secrets.WEBAPP_NAME }}/extensions/onedeploy?api-version=2020-12-01"
+            az rest --method PUT \
+            --uri $SITE_URI \
+            --body '{ 
+               "properties": { 
+                "packageUri": "'"${ZIP_URL}"'",                
+                "type": "zip", 
+                "ignorestack": false,
+                "clean": true,
+                "restart": false
+              }
+            }'
+            az rest --method GET --uri $SITE_URI
