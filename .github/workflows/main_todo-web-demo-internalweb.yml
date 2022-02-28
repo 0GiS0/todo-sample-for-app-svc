@@ -99,6 +99,9 @@ jobs:
               if [[ "$STATUS" == "\"Succeeded\"" ]]; then
                   echo "Deployment succeeded"
                   break
+              else if [[ "$STATUS" == "\"Failed\"" ]]; then
+                echo "Deployment failed"
+                exit 1
               else
                 echo "Deployment state: $STATUS..."
                 sleep 5
