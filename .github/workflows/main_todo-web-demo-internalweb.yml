@@ -59,9 +59,9 @@ jobs:
             az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name dotnetapp.zip --file myapp.zip
       - name: Get date after 30 minutes
         id: date
-        run: |
-          date -d "30 minutes" +%Y-%m-%dT%H:%MZ
-          run: echo "::set-output name=date::$(date -d "30 minutes" +%Y-%m-%dT%H:%MZ)"
+        run: |          
+          TZ=Europe/Madrid date -d "30 minutes" +%Y-%m-%dT%H:%MZ
+          echo "::set-output name=date::$(TZ=Europe/Madrid date -d "30 minutes" +%Y-%m-%dT%H:%MZ)"
       - name: Azure CLI script
         uses: azure/CLI@v1
         with:
