@@ -42,12 +42,15 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Zip up the app
-        run: zip -r myapp.zip ${{ env.DOTNET_ROOT }}/myapp
+        run: | 
+          ls
+          zip -r myapp.zip ${{ env.DOTNET_ROOT }}/myapp
       - name: Azure CLI script
         uses: azure/CLI@v1
         with:
