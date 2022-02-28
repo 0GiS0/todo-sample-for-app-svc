@@ -51,16 +51,24 @@ jobs:
         run: | 
           ls
           zip -r myapp.zip myapp/
+      - name: Upload the zip to Azure
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.33.1
+          inlineScript: |
+            az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name dotnetapp.zip --file myapp.zip
+      - name: Get date after 30 minutes
+        id: date
+        run: |
+          date -d "30 minutes" +%Y-%m-%dT%H:%MZ
+          run: echo "::set-output name=date::$(date -d "30 minutes" +%Y-%m-%dT%H:%MZ)"
       - name: Azure CLI script
         uses: azure/CLI@v1
         with:
           azcliversion: 2.33.1
-          inlineScript: |            
-            az storage blob upload --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --container-name packages --name dotnetapp.zip --file myapp.zip
-            STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }} --query "[0].value" --output tsv)
-            date -d"30 minutes" +%Y-%m-%dT%H:%MZ
-            end=$(date -d"30 minutes" +%Y-%m-%dT%H:%MZ)
-            SAS=$(az storage account generate-sas --permissions rl --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --account-key $STORAGE_ACCOUNT_KEY --services b --resource-types co --expiry $end -o tsv)
+          inlineScript: |
+            STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --resource-group ${{ secrets.RESOURCE_GROUP }} --query "[0].value" --output tsv)            
+            SAS=$(az storage account generate-sas --permissions rl --account-name ${{ secrets.STORAGE_ACCOUNT_NAME }} --account-key $STORAGE_ACCOUNT_KEY --services b --resource-types co --expiry ${{ steps.date.outputs.date }} -o tsv)
             ZIP_URL="https://${{ secrets.STORAGE_ACCOUNT_NAME }}.blob.core.windows.net/packages/dotnetapp.zip?$SAS"
             SUBSCRIPTION_ID=$(az account show --query id --output tsv)
             SITE_URI="https://management.azure.com/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${{ secrets.RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ secrets.WEBAPP_NAME }}/extensions/onedeploy?api-version=2020-12-01"
