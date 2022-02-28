@@ -93,7 +93,7 @@ jobs:
             #az rest --method GET --uri ${{ steps.deployment.outputs.deployment }}
 
             echo "Install jq"
-            apt-get install jq
+            apk add jq
 
             while true; do
               STATUS=$(az rest --method GET --uri ${{ steps.deployment.outputs.deployment }} | jq '.value[0].properties.provisioningState')
