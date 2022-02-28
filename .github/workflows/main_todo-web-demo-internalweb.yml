@@ -95,8 +95,8 @@ jobs:
 
             while true; do
               STATUS=$(az rest --method GET --uri ${{ steps.deployment.outputs.deployment }} | jq '.value[0].properties.provisioningState')
-              echo "$STATUS" == "Succeeded"
-              if [[ "$STATUS" == "Succeeded" ]]; then
+              echo "$STATUS" == "\"Succeeded\""
+              if [[ "$STATUS" == "\"Succeeded\"" ]]; then
                   echo "Deployment succeeded"
                   break
               else
