@@ -49,8 +49,8 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Zip up the app
         run: | 
-          ls
-          zip -r myapp.zip myapp/
+          cd myapp
+          zip -r ../myapp.zip .
       - name: Upload the zip to Azure
         uses: azure/CLI@v1
         with:
