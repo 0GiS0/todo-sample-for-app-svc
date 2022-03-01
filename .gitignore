@@ -354,3 +354,6 @@ appsettings.Development.json
 
 dotnetapp/
 dotnetapp.zip
+
+codeqldb/
+codeql-results/
